@@ -133,7 +133,26 @@ namespace EllipticCurveGenerationJ0
             }
 
         }
+        
+         public static int FindP(int length)
+        {
+            int p = 0;
+            bool pFound = false;
+            Random rand = new Random();
 
+            // 2^(l-1) < p < 2^l
+            while (!pFound)
+            {
+                p = rand.Next((int)Math.Pow(2, length - 1), (int)Math.Pow(2, length));
+
+                if (IsPrimeNumber(p) && (p % 6 == 1))
+                {
+                    pFound = true;
+                }
+            }
+
+            return p;
+        }
 
         public static bool IsPrimeNumber(long number)
         {
