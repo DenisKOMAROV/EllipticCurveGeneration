@@ -10,10 +10,13 @@ namespace EllipticCurveGenerationJ0
     {
         static void Main(string[] args)
         {
-           int m = 5;
+                       int conditionN = -1;
+            int m = 5;
             int r = 0;
-            int[] N = new int[6];
-            int p = 64033;
+            int[] checkN = new int[6];
+            int N = 0;
+            int p=0;
+            int l = 16;
             bool firstFlag = true;
             bool secondFlag = true;
             while (secondFlag)
@@ -21,39 +24,47 @@ namespace EllipticCurveGenerationJ0
                 firstFlag = true;
                 while (firstFlag)
                 {
-                    // generP;
+                    p = FindP(l);
                     int[] x = alg781(p);
                     int c = x[0];
                     int d = x[1];
-                    N[0] = p + 1 + (c + 3 * d);
-                    N[1] = p + 1 + (c - 3 * d);
-                    N[2] = p + 1 + (2 * c);
-                    N[3] = p + 1 - (c + 3 * d);
-                    N[4] = p + 1 + (c - 3 * d);
-                    N[5] = p + 1 + (2 * c);
+                    checkN[0] = p + 1 + (c + 3 * d);
+                    checkN[1] = p + 1 + (c - 3 * d);
+                    checkN[2] = p + 1 + (2 * c);
+                    checkN[3] = p + 1 - (c + 3 * d);
+                    checkN[4] = p + 1 + (c - 3 * d);
+                    checkN[5] = p + 1 + (2 * c);
                     for (int j = 0; j < 6; j++)
                     {
-                        if (IsPrimeNumber(N[j]))
+                        if (IsPrimeNumber(checkN[j]))
                         {
-                            r = N[j];
+                            conditionN = 0;
+                            N = checkN[j];
+                            r = checkN[j];
                             firstFlag = false;
                             break;
                         }
-                        else if (N[j] % 2 == 0 && IsPrimeNumber(N[j] / 2))
+                        else if (checkN[j] % 2 == 0 && IsPrimeNumber(checkN[j] / 2))
                         {
-                            r = N[j] / 2;
+                            conditionN = 1;
+                            N = checkN[j];
+                            r = checkN[j] / 2;
                             firstFlag = false;
                             break;
                         }
-                        else if (N[j] % 3 == 0 && IsPrimeNumber(N[j] / 3))
+                        else if (checkN[j] % 3 == 0 && IsPrimeNumber(checkN[j] / 3))
                         {
-                            r = N[j] / 3;
+                            conditionN = 2;
+                            N = checkN[j];
+                            r = checkN[j] / 3;
                             firstFlag = false;
                             break;
                         }
-                        else if (N[j] % 6 == 0 && IsPrimeNumber(N[j] / 6))
+                        else if (checkN[j] % 6 == 0 && IsPrimeNumber(checkN[j] / 6))
                         {
-                            r = N[j] / 6;
+                            conditionN = 3;
+                            N = checkN[j];
+                            r = checkN[j] / 6;
                             firstFlag = false;
                             break;
                         }
@@ -69,7 +80,58 @@ namespace EllipticCurveGenerationJ0
                     if ((long)Math.Pow(p, i) % r == 1)
                         continue;
                 }
+                secondFlag = false;
+
             }
+            bool thirdFlag = true;
+            int x0 = 0;
+            int y0 = 0;
+            Random random = new Random();
+            int B = 0;
+            bool fourthFlag = true;
+            while (fourthFlag)
+            {
+                thirdFlag = true;
+                while (thirdFlag)
+                {
+                    x0 = random.Next(int.MinValue, int.MaxValue);
+                    y0 = random.Next(int.MinValue, int.MaxValue);
+                    B = Math.Abs(y0 * y0 - x0 * x0 * x0) % p;
+                    switch (conditionN)
+                    {
+                        case 0:
+                            if ((int)Math.Pow(B, (p - 1) / 3) % p != 1 && (int)Math.Pow(B, (p - 1) / 2) % p != 1)
+                            {
+                                thirdFlag = false;
+                                continue;
+                            }
+                            break;
+                        case 1:
+                            if ((int)Math.Pow(B, (p - 1) / 3) % p == 1 && (int)Math.Pow(B, (p - 1) / 2) % p != 1)
+                            {
+                                thirdFlag = false;
+                                continue;
+                            }
+                            break;
+                        case 2:
+                            if ((int)Math.Pow(B, (p - 1) / 3) % p != 1 && (int)Math.Pow(B, (p - 1) / 2) % p == 1)
+                            {
+                                thirdFlag = false;
+                                continue;
+                            }
+                            break;
+                        case 3:
+                            if ((int)Math.Pow(B, (p - 1) / 3) % p == 1 && (int)Math.Pow(B, (p - 1) / 2) % p == 1)
+                            {
+                                thirdFlag = false;
+                                continue;
+                            }
+                            break;
+                    }
+                }
+
+            }
+
         }
 
 
