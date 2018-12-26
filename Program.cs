@@ -10,19 +10,66 @@ namespace EllipticCurveGenerationJ0
     {
         static void Main(string[] args)
         {
-            // Elliptic curve generation with j=0
-
-            int length = 16; // l
-            int securityParameter = 5; // m table 11.5
-
-            // p = 1mod6
+           int m = 5;
+            int r = 0;
+            int[] N = new int[6];
             int p = 64033;
-            // p = c**2 + 3d**2
-            int c = 239;
-            int d = 48;
+            bool firstFlag = true;
+            bool secondFlag = true;
+            while (secondFlag)
+            {
+                firstFlag = true;
+                while (firstFlag)
+                {
+                    // generP;
+                    int[] x = alg781(p);
+                    int c = x[0];
+                    int d = x[1];
+                    N[0] = p + 1 + (c + 3 * d);
+                    N[1] = p + 1 + (c - 3 * d);
+                    N[2] = p + 1 + (2 * c);
+                    N[3] = p + 1 - (c + 3 * d);
+                    N[4] = p + 1 + (c - 3 * d);
+                    N[5] = p + 1 + (2 * c);
+                    for (int j = 0; j < 6; j++)
+                    {
+                        if (IsPrimeNumber(N[j]))
+                        {
+                            r = N[j];
+                            firstFlag = false;
+                            break;
+                        }
+                        else if (N[j] % 2 == 0 && IsPrimeNumber(N[j] / 2))
+                        {
+                            r = N[j] / 2;
+                            firstFlag = false;
+                            break;
+                        }
+                        else if (N[j] % 3 == 0 && IsPrimeNumber(N[j] / 3))
+                        {
+                            r = N[j] / 3;
+                            firstFlag = false;
+                            break;
+                        }
+                        else if (N[j] % 6 == 0 && IsPrimeNumber(N[j] / 6))
+                        {
+                            r = N[j] / 6;
+                            firstFlag = false;
+                            break;
+                        }
+                    }
+                }
 
-            Console.WriteLine(L(3,3));
-            // output Elliptic curve E(Fp), point Q simple order r
+                if (p == r)
+                {
+                    continue;
+                }
+                for (int i = 1; i <= m; i++)
+                {
+                    if ((long)Math.Pow(p, i) % r == 1)
+                        continue;
+                }
+            }
         }
 
 
