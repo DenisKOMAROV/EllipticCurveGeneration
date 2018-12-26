@@ -15,16 +15,33 @@ namespace EllipticCurveGenerationJ0
             int length = 16; // l
             int securityParameter = 5; // m table 11.5
 
-            // p = 1mod6
-            int p = 64033;
-            // p = c**2 + 3d**2
-            int c = 239;
-            int d = 48;
+            int p = FindP(length);
+            Console.WriteLine(p);
 
-            Console.WriteLine(L(3,3));
+            
             // output Elliptic curve E(Fp), point Q simple order r
         }
 
+
+        public static int FindP(int length)
+        {
+            int p = 0;
+            bool pFound = false;
+            Random rand = new Random();
+
+            // 2^(l-1) < p < 2^l
+            while (!pFound)
+            {
+                p = rand.Next((int)Math.Pow(2, length - 1), (int)Math.Pow(2, length));
+
+                if (IsPrimeNumber(p) && (p % 6 == 1))
+                {
+                    pFound = true;
+                }
+            }
+
+            return p;
+        }
 
         public static bool IsPrimeNumber(long number)
         {
