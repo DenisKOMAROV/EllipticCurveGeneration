@@ -134,6 +134,108 @@ namespace EllipticCurveGenerationJ0
 
         }
         
+        
+        
+        public static int[] addPoint(int x0, int y0, int x1, int y1, int p)
+        {
+            int[] help = new int[2];
+            int resX = 0;
+            int resY = 0;
+            long dy = (y1 - y0) % p;
+            long dx = (x1 - x0) % p;
+            if (dx < 0)
+                dx += p;
+            if (dy < 0)
+                dy += p;
+            int inv = findInversedElement((int)dx, p);
+            long lmbda = (dy * inv)%p;
+
+            resX = (int)(lmbda * lmbda - x0 - x1) % p;
+            resY = (int)(lmbda * (x0 - resX) - y0) % p;
+
+            if (resX < 0)
+                resX += p;
+            if (resY < 0)
+                resY += p;
+
+            help[0] = resX;
+            help[1] = resY;
+            return help;
+        }
+
+        public static int[] doublePoint(int x, int y,  int p)
+        {
+            int[] help = new int[2];
+            int resX = 0;
+            int resY = 0;
+            int dy = (3 * x * x) % p;
+            int dx = (2 * y) % p;
+
+            if (dx < 0)
+                dx += p;
+            if (dy < 0)
+                dy += p;
+
+            int lmbda = (dy * findInversedElement(dx, p)) % p;
+
+            resX = (lmbda * lmbda - x - x) % p;
+            resY = (lmbda * (x - resX) - y) % p;
+
+            if (resX < 0)
+                resX += p;
+            if (resY < 0)
+                resY += p;
+
+            help[0] = resX;
+            help[1] = resY;
+            return help;
+        }
+
+        public static int[] multiplyPoint(int k, int x, int y, int p)
+        {
+            int[] help = new int[2];
+            k--;
+            int tempX = x;
+            int tempY = y;
+            while (k != 0)
+            {
+                if (k % 2 != 0)
+                {
+                    if (tempX == x && tempY == y)
+                    {
+                        help = doublePoint(tempX, tempY, p);
+                        tempX = help[0];
+                        tempY = help[1];
+                    } else
+                    {
+                        help = addPoint(tempX, tempY, x, y, p);
+                        tempX = help[0];
+                        tempY = help[1];
+                    }
+                    k--;
+                }
+                else
+                {
+                    k = k / 2;
+                    help = doublePoint(tempX, tempY, p);
+                    tempX = help[0];
+                    tempY = help[1];
+                }
+            }
+            help[0] = tempX;
+            help[1] = tempY;
+            return help;
+        }
+
+
+        public static int findInversedElement(int a, int p)
+        {
+            for (int i = 1; i < p; i++)
+                if (i * a % p == 1)
+                    return i;
+            return 0;
+        }
+        
          public static int FindP(int length)
         {
             int p = 0;
