@@ -7,24 +7,28 @@ using System.Threading.Tasks;
 namespace EllipticCurveGenerationJ0
 {
     class Program
-    {
-        static void Main(string[] args)
-        {
-                       int conditionN = -1;
+    { static void Main(string[] args)
+        { 
+            int l = 17;
             int m = 5;
+
+
+
             int r = 0;
+            int conditionN = -1;
             int[] checkN = new int[6];
             int N = 0;
             int p=0;
-            int l = 16;
             bool firstFlag = true;
             bool secondFlag = true;
+            #region alg
             while (secondFlag)
-            {
+            {              
                 firstFlag = true;
                 while (firstFlag)
                 {
                     p = FindP(l);
+                    //p = 64033;
                     int[] x = alg781(p);
                     int c = x[0];
                     int d = x[1];
@@ -32,8 +36,8 @@ namespace EllipticCurveGenerationJ0
                     checkN[1] = p + 1 + (c - 3 * d);
                     checkN[2] = p + 1 + (2 * c);
                     checkN[3] = p + 1 - (c + 3 * d);
-                    checkN[4] = p + 1 + (c - 3 * d);
-                    checkN[5] = p + 1 + (2 * c);
+                    checkN[4] = p + 1 - (c - 3 * d);
+                    checkN[5] = p + 1 - (2 * c);
                     for (int j = 0; j < 6; j++)
                     {
                         if (IsPrimeNumber(checkN[j]))
@@ -83,6 +87,7 @@ namespace EllipticCurveGenerationJ0
                 secondFlag = false;
 
             }
+            int[] temp = new int[2];
             bool thirdFlag = true;
             int x0 = 0;
             int y0 = 0;
@@ -96,32 +101,34 @@ namespace EllipticCurveGenerationJ0
                 {
                     x0 = random.Next(int.MinValue, int.MaxValue);
                     y0 = random.Next(int.MinValue, int.MaxValue);
+                    //x0 = -1;
+                    //y0 = 10;
                     B = Math.Abs(y0 * y0 - x0 * x0 * x0) % p;
                     switch (conditionN)
                     {
                         case 0:
-                            if ((int)Math.Pow(B, (p - 1) / 3) % p != 1 && (int)Math.Pow(B, (p - 1) / 2) % p != 1)
+                            if (!checkQube(B,p) && L(B,p) != 1)
                             {
                                 thirdFlag = false;
                                 continue;
                             }
                             break;
                         case 1:
-                            if ((int)Math.Pow(B, (p - 1) / 3) % p == 1 && (int)Math.Pow(B, (p - 1) / 2) % p != 1)
+                            if (checkQube(B,p) && L(B, p) != 1)
                             {
                                 thirdFlag = false;
                                 continue;
                             }
                             break;
                         case 2:
-                            if ((int)Math.Pow(B, (p - 1) / 3) % p != 1 && (int)Math.Pow(B, (p - 1) / 2) % p == 1)
+                            if (!checkQube(B,p) && L(B, p) == 1)
                             {
                                 thirdFlag = false;
                                 continue;
                             }
                             break;
                         case 3:
-                            if ((int)Math.Pow(B, (p - 1) / 3) % p == 1 && (int)Math.Pow(B, (p - 1) / 2) % p == 1)
+                            if (checkQube(B,p) && L(B, p) == 1)
                             {
                                 thirdFlag = false;
                                 continue;
@@ -129,20 +136,50 @@ namespace EllipticCurveGenerationJ0
                             break;
                     }
                 }
+                temp = multiplyPoint(N, x0, y0, p);
+                if (temp[0] == 0 && temp[1] == 0)
+                {
+                    continue;
+                }
+                temp = multiplyPoint(N / r, x0, y0, p);
+                fourthFlag = false;
 
             }
+            #endregion
+
+            Console.WriteLine("p = " + p );
+            Console.WriteLine("B = " + B);
+            Console.WriteLine("Q ( {0} , {1} )", temp[0], temp[1]);
+            Console.WriteLine("r = " + r);
+            Console.ReadKey();
+
 
         }
-        
-        
-        
-        public static int[] addPoint(int x0, int y0, int x1, int y1, int p)
+
+        public static bool checkQube(int b, int p)
         {
-            int[] help = new int[2];
-            int resX = 0;
-            int resY = 0;
+            int temp = 1;
+            for (int i = 1; i< (p - 1) / 3; i++)
+            {
+                temp = (temp * b) % p;
+            }
+            if(temp == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+        public static long[] addPoint(int x0, int y0, int x1, int y1, int p)
+        {
+            long[] help = new long[2];
+            long resX = 0;
+            long resY = 0;
             long dy = (y1 - y0) % p;
             long dx = (x1 - x0) % p;
+            if (dx == 0)
+            {
+                return help;
+            }
             if (dx < 0)
                 dx += p;
             if (dy < 0)
@@ -150,8 +187,8 @@ namespace EllipticCurveGenerationJ0
             int inv = findInversedElement((int)dx, p);
             long lmbda = (dy * inv)%p;
 
-            resX = (int)(lmbda * lmbda - x0 - x1) % p;
-            resY = (int)(lmbda * (x0 - resX) - y0) % p;
+            resX = (long)(lmbda * lmbda - x0 - x1) % p;
+            resY = (long)(lmbda * (x0 - resX) - y0) % p;
 
             if (resX < 0)
                 resX += p;
@@ -163,20 +200,24 @@ namespace EllipticCurveGenerationJ0
             return help;
         }
 
-        public static int[] doublePoint(int x, int y,  int p)
+        public static long[] doublePoint(int x, int y,  int p)
         {
-            int[] help = new int[2];
-            int resX = 0;
-            int resY = 0;
-            int dy = (3 * x * x) % p;
-            int dx = (2 * y) % p;
+            long[] help = new long[2];
+            long resX = 0;
+            long resY = 0;
+            long dy = (3 * x * x) % p;
+            long dx = (2 * y) % p;
 
+            if (dx == 0)
+            {
+                return help;
+            }
             if (dx < 0)
                 dx += p;
             if (dy < 0)
                 dy += p;
 
-            int lmbda = (dy * findInversedElement(dx, p)) % p;
+            long lmbda = (dy * findInversedElement((int)dx, p)) % p;
 
             resX = (lmbda * lmbda - x - x) % p;
             resY = (lmbda * (x - resX) - y) % p;
@@ -193,6 +234,7 @@ namespace EllipticCurveGenerationJ0
 
         public static int[] multiplyPoint(int k, int x, int y, int p)
         {
+            long[] temp = new long[2];
             int[] help = new int[2];
             k--;
             int tempX = x;
@@ -203,30 +245,47 @@ namespace EllipticCurveGenerationJ0
                 {
                     if (tempX == x && tempY == y)
                     {
-                        help = doublePoint(tempX, tempY, p);
+                        temp = doublePoint(tempX, tempY, p);
+                        help[0] = (int)temp[0];
+                        help[1] = (int)temp[1];
                         tempX = help[0];
                         tempY = help[1];
+                        if (tempX == 0 && tempY == 0)
+                        {
+                            return help;
+                        }
                     } else
                     {
-                        help = addPoint(tempX, tempY, x, y, p);
+                        temp = addPoint(tempX, tempY, x, y, p);
+                        help[0] = (int)temp[0];
+                        help[1] = (int)temp[1];
                         tempX = help[0];
                         tempY = help[1];
+                        if (tempX == 0 && tempY == 0)
+                        {
+                            return help;
+                        }
                     }
                     k--;
                 }
                 else
                 {
                     k = k / 2;
-                    help = doublePoint(tempX, tempY, p);
+                    temp = doublePoint(tempX, tempY, p);
+                    help[0] = (int)temp[0];
+                    help[1] = (int)temp[1];
                     tempX = help[0];
                     tempY = help[1];
+                    if (tempX == 0 && tempY == 0)
+                    {
+                        return help;
+                    }
                 }
             }
             help[0] = tempX;
             help[1] = tempY;
             return help;
         }
-
 
         public static int findInversedElement(int a, int p)
         {
